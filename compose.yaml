@@ -1,46 +1,69 @@
 services:
-  # Service 1 : Le conteneur de votre application Symfony
   php:
     build:
       context: .
       dockerfile: Dockerfile
-    user: "www-data"
     container_name: symfony_php
+    user: "www-data"
     ports:
-      - "82:80" # Expose le port 80 du conteneur au port 82 de votre machine (pour éviter les conflits)
+      - "82:80"                  # App: http://localhost:82
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: "1"
+      TZ: Europe/Paris
+      # >>> IMPORTANT : connexion DB correcte (root:root @ db / project_docker)
+      DATABASE_URL: "mysql://root:root@db:3306/project_docker?serverVersion=8.0"
+      # (si tu utilises Mailer en dev)
+      MAILER_DSN: "smtp://mailhog:1025"
     volumes:
-      - .:/var/www/html # Monte le répertoire local du projet dans le conteneur
+      - .:/var/www/html
     depends_on:
-      - db
-    restart: always
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
-  # Service 2 : Le serveur de base de données MySQL
   db:
     image: mysql:8.0
     container_name: symfony_db
-    ports:
-      - "3307:3306" # Expose le port 3306 du conteneur au port 3307 de votre machine (pour HeidiSQL)
+    # Options stables pour Docker/Windows
+    command: --default-authentication-plugin=mysql_native_password --skip-host-cache --skip-name-resolve
     environment:
-      # Laissez vide pour root sans mot de passe, mais c'est UNIQUEMENT pour le développement
-      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes' 
-      MYSQL_DATABASE: project-docker  # Nom de la base de données
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: project_docker      # pas de tiret
+      TZ: Europe/Paris
+    ports:
+      - "3307:3306"                        # MySQL: localhost:3307
     volumes:
-      - db-data:/var/lib/mysql # Conserve les données même après l'arrêt du conteneur
-    restart: always
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -proot --silent || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 60
+    restart: unless-stopped
 
-  # Service 3 : L'interface d'administration de la base de données
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
     container_name: symfony_pma
-    ports:
-      - "8888:80" # Accessible via http://localhost:8888
     environment:
-      PMA_HOST: db # IMPORTANT : Utilise le nom du service "db" pour la connexion
-      MYSQL_ROOT_PASSWORD: '' # Laissez vide car le mot de passe root est vide sur "db"
+      PMA_HOST: db
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M
+      TZ: Europe/Paris
+    ports:
+      - "8888:80"                          # http://localhost:8888
     depends_on:
-      - db
-    restart: always
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
-# Volumes persistants pour les données MySQL
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: symfony_mailhog
+    ports:
+      - "8025:8025"                        # http://localhost:8025
+    restart: unless-stopped
+
 volumes:
   db-data:
+ 
