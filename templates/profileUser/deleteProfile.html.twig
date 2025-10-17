@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello you!{% endblock %}
+
+{% block body %}
+
+
+<h1>Confirm your wish to delete your profile</h1>
+
+
+<form method="post" action="{{ path('yesConfirm') }}" >
+
+        <input type="hidden" name="_token" value="{{ csrf_token('delete_profile' ~ app.user.id) }}">
+                  
+        <button type="submit">
+            I'm sure.
+        </button>
+
+    </form>
+
+    
+
+<a href=" {{ 'noConfirm' }}">I'm not sure.</a>
+
+{% endblock %}

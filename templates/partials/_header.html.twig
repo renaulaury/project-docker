@@ -1,0 +1,11 @@
+<header>
+     {% if app.user %}
+            <div class="mb-3">
+                Hello <a href="{{ 'profile' }}">{{ app.user.userIdentifier }}</a>, <a href="{{ path('logout') }}">Logout</a>
+            </div>
+
+        {% else %}
+            <a href="{{ 'register' }}">Register</a>
+            <a href="{{ 'login' }}">Login</a>
+        {% endif %}
+</header>
