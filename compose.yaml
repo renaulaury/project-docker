@@ -6,14 +6,12 @@ services:
     container_name: symfony_php
     user: "www-data"
     ports:
-      - "82:80"                  # App: http://localhost:82
+      - "82:80"
     environment:
       APP_ENV: dev
       APP_DEBUG: "1"
       TZ: Europe/Paris
-      # >>> IMPORTANT : connexion DB correcte (root:root @ db / project_docker)
       DATABASE_URL: "mysql://root:root@db:3306/project_docker?serverVersion=8.0"
-      # (si tu utilises Mailer en dev)
       MAILER_DSN: "smtp://mailhog:1025"
     volumes:
       - .:/var/www/html
@@ -21,18 +19,19 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - symfony
 
   db:
     image: mysql:8.0
     container_name: symfony_db
-    # Options stables pour Docker/Windows
     command: --default-authentication-plugin=mysql_native_password --skip-host-cache --skip-name-resolve
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: project_docker      # pas de tiret
+      MYSQL_DATABASE: project_docker
       TZ: Europe/Paris
     ports:
-      - "3307:3306"                        # MySQL: localhost:3307
+      - "3307:3306"
     volumes:
       - db-data:/var/lib/mysql
     healthcheck:
@@ -41,6 +40,8 @@ services:
       timeout: 3s
       retries: 60
     restart: unless-stopped
+    networks:
+      - symfony
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
@@ -51,19 +52,26 @@ services:
       UPLOAD_LIMIT: 64M
       TZ: Europe/Paris
     ports:
-      - "8888:80"                          # http://localhost:8888
+      - "8888:80"
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - symfony
 
   mailhog:
     image: mailhog/mailhog:latest
     container_name: symfony_mailhog
     ports:
-      - "8025:8025"                        # http://localhost:8025
+      - "8025:8025"
     restart: unless-stopped
+    networks:
+      - symfony
 
 volumes:
   db-data:
+
+networks:
+  symfony:
  
