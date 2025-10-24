@@ -1,11 +1,13 @@
-<header>
+<header class="bg-gray-800 w-full text-white text-center p-4 text-xl">
      {% if app.user %}
             <div class="mb-3">
+                <a href="{{ 'home' }}">Welcome</a>
                 Hello <a href="{{ 'profile' }}">{{ app.user.userIdentifier }}</a>, <a href="{{ path('logout') }}">Logout</a>
             </div>
 
         {% else %}
-            <a href="{{ 'register' }}">Register</a>
+            <a href="{{ 'home' }}">Welcome</a>s
+            <a href="{{ 'register' }}">Register</a>            
             <a href="{{ 'login' }}">Login</a>
         {% endif %}
 </header>
