@@ -31,8 +31,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string The hashed password
      */
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?string $password = null;
+
+    // Nouveau champ pour l'ID Google
+    #[ORM\Column(length: 255, unique: true, nullable: true)]
+    private ?string $googleId = null; 
 
     public function getId(): ?int
     {
@@ -91,9 +95,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function setPassword(string $password): static
+    public function setPassword(?string $password): static
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): static
+    {
+        $this->googleId = $googleId;
 
         return $this;
     }
@@ -104,7 +120,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __serialize(): array
     {
         $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
+        // On n'hache que si le mot de passe existe
+        $data["\0".self::class."\0password"] = $this->password ? hash('crc32c', $this->password) : null; //crc32c hash leger en session et comparé lors de la désérialisation avec la bdd
 
         return $data;
     }
