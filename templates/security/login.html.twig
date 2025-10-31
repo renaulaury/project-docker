@@ -25,9 +25,19 @@
                 <label for="_remember_me">Remember me</label>
             </div>
         #}
+        
 
         <button class="btn btn-lg btn-primary" type="submit">
             Sign in
         </button>
     </form>
+
+    <div>
+        <a href="{{ path('connect_google') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-lg shadow-sm transition-colors">
+            <svg width="18" height="18">
+                <image href="https://www.google.com/favicon.ico" width="18" height="18"/>
+            </svg>
+            Se connecter avec Google
+        </a>
+    </div>
 {% endblock %}

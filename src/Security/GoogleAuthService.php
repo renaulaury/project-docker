@@ -12,7 +12,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * dans la base de données après un retour d'authentification réussi de Google.
  * Il est utilisé par GoogleAuthenticator.
  */
-class GoogleOAuthService
+class GoogleAuthService
 {
     private EntityManagerInterface $entityManager;
 
